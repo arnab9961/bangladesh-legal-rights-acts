@@ -1,0 +1,15 @@
+venv
+env
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.Python
+.git
+.gitignore
+data/processed_law.json
+data/meta.json
+data/filtered_act_list.csv
+node_modules
+build
+dist

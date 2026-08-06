@@ -1,0 +1,199 @@
+<!DOCTYPE html>
+<html lang="bn" data-theme="serika">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>লিগ্যালটাইপ • বাংলাদেশের আইন RAG</title>
+  <meta name="description" content="বাংলাদেশের আইন ও সাংবিধানিক অধিকার ভিত্তিক সরল RAG চ্যাটবট।">
+  <link rel="stylesheet" href="/static/css/retrocast.css">
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>⚖️</text></svg>">
+</head>
+<body>
+
+  <!-- Top Header Navigation (Monkeytype Style) -->
+  <header class="app-header">
+    <div class="logo-group">
+      <span class="logo-icon">⚖️</span>
+        <div class="logo-text">
+          লিগ্যাল<span class="logo-accent">টাইপ</span>
+        </div>
+    </div>
+
+    <nav class="header-nav">
+      <button id="openThemeBtn" class="nav-btn" title="থিম পরিবর্তন করুন">
+        🎨 <span>থিম</span>
+      </button>
+      <button id="openActsBtn" class="nav-btn" title="বাংলাদেশ আইন সূচি দেখুন">
+        📜 <span>১,৪৮৪ আইন</span>
+      </button>
+      <button id="openSettingsBtn" class="nav-btn" title="API কী ও মডেল সেটিংস">
+        ⚙️ <span>সেটিংস</span>
+      </button>
+    </nav>
+  </header>
+
+  <!-- Main Container -->
+  <main class="main-wrapper">
+
+    <!-- Presets / Mode Selector Bar (Monkeytype Bar Style) -->
+    <div class="presets-bar">
+      <span style="font-family: var(--font-mono); font-size: 0.8rem; color: var(--text-sub); margin-right: 0.5rem;">প্রম্পট:</span>
+      <button class="preset-chip active" data-prompt="What fundamental rights are guaranteed under the Constitution of Bangladesh?">
+        সংবিধান
+      </button>
+      <button class="preset-chip" data-prompt="Explain criminal trespass provisions and punishment under the Penal Code.">
+        দণ্ডবিধি
+      </button>
+      <button class="preset-chip" data-prompt="What are working hours, overtime rules, and leave policies under Bangladesh Labor Act?">
+        শ্রম আইন
+      </button>
+      <button class="preset-chip" data-prompt="What legal remedies exist under the Domestic Violence (Prevention and Protection) Act?">
+        গার্হস্থ্য সহিংসতা
+      </button>
+      <button class="preset-chip" data-prompt="What are mandatory requirements for land transfer & registration in Bangladesh?">
+        জমি নিবন্ধন
+      </button>
+    </div>
+
+    <!-- Main Chat Window -->
+    <section class="chat-container">
+
+      <!-- Messages Stream -->
+      <div id="chatMessages" class="messages-area">
+        <div class="message-row assistant">
+          <div class="message-header">
+            <span class="role-badge">লিগ্যালটাইপ এআই</span>
+            <span>&bull; RAG ইঞ্জিন অনলাইন (৩৫,৬৩০ অনুচ্ছেদ)</span>
+          </div>
+          <div class="message-content">
+            <strong>লিগ্যালটাইপ</strong>-এ স্বাগতম। বাংলাদেশের আইন, সংবিধানিক অধিকার, দণ্ডবিধি, শ্রম আইন, অথবা সম্পত্তি নিবন্ধন সম্পর্কিত যে কোনও আইনগত প্রশ্ন জিজ্ঞাসা করুন।
+            <br/><br/>
+            <span style="color: var(--text-sub); font-size: 0.9rem;">
+              উপদেশ: আপনার Groq বা OpenAI API কী বা পছন্দের LLM মডেল সেট করতে উপরের <strong>সেটিংস</strong> এ ক্লিক করুন।
+            </span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Input Bar -->
+      <div class="input-wrapper">
+        <input 
+          id="chatInput" 
+            type="text" 
+            class="monkey-input" 
+            placeholder="একটি আইনগত প্রশ্ন টাইপ করুন বা একটি প্রম্পট নির্বাচন করুন..." 
+          autocomplete="off"
+        />
+          <button id="sendBtn" class="btn-send">
+            পাঠান ↵
+          </button>
+      </div>
+
+    </section>
+
+    <!-- Footer telemetry -->
+    <footer class="footer-info">
+      <span>বাংলাদেশ আইন RAG ইঞ্জিন</span> &bull; <span>১,৪৮৪ আইন</span> &bull; <span>৩৫,৬৩০ অনুচ্ছেদ</span> &bull; <span>groq / openai</span>
+    </footer>
+
+  </main>
+
+  <!-- Theme Selector Modal -->
+  <div id="themeModal" class="modal-backdrop">
+    <div class="modal-box">
+      <div class="modal-header">
+        <span>🎨 থিম প্যালেট নির্বাচন করুন</span>
+        <button id="closeThemeBtn" class="btn-close">✕</button>
+      </div>
+      <div class="theme-options">
+        <button class="theme-chip selected" data-theme="serika">Serika Dark</button>
+        <button class="theme-chip" data-theme="carbon">Carbon</button>
+        <button class="theme-chip" data-theme="dracula">Dracula</button>
+        <button class="theme-chip" data-theme="nord">Nord</button>
+        <button class="theme-chip" data-theme="matrix">Matrix</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Settings Control Unit Modal -->
+  <div id="settingsModal" class="modal-backdrop">
+    <div class="modal-box">
+      <div class="modal-header">
+        <span>⚙️ সেটিংস</span>
+        <button id="closeSettingsBtn" class="btn-close">✕</button>
+      </div>
+
+      <div class="field-group">
+        <label class="field-label">GROQ CLOUD / OPENAI API কী</label>
+        <input 
+          id="apiKeyInput" 
+          type="password" 
+          class="monkey-input" 
+          placeholder="gsk_... or sk-..."
+        />
+        <span style="font-size: 0.78rem; color: var(--text-sub);">
+          আপনার ব্রাউজারে স্থানীয়ভাবে সেভ থাকবে। ফাঁকা থাকলে পরিবেশগত কী ব্যবহার করা হবে।
+        </span>
+      </div>
+
+      <div class="field-group">
+        <label class="field-label">এলএলএম মডেল</label>
+        <select id="modelSelect" class="monkey-select">
+          <option value="llama-3.3-70b-versatile">Llama 3.3 70B (Groq)</option>
+          <option value="llama3-70b-8192">Llama 3 70B (Groq)</option>
+          <option value="mixtral-80b-32768">Mixtral 8x7B (Groq)</option>
+          <option value="gemma2-9b-it">Gemma 2 9B (Groq)</option>
+          <option value="gpt-4o">GPT-4o (OpenAI)</option>
+        </select>
+      </div>
+
+      <div class="field-group">
+        <label class="field-label">রিট্রাইভাল টপ-ক ক্লজ</label>
+        <input 
+          id="topKInput" 
+          type="number" 
+          class="monkey-input" 
+          value="5" 
+          min="1" 
+          max="20"
+        />
+      </div>
+
+      <div style="display: flex; justify-content: flex-end; gap: 0.75rem; margin-top: 0.5rem;">
+        <button id="saveSettingsBtn" class="btn-send">
+          সেটিংস সংরক্ষণ
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Citation Detail Modal -->
+  <div id="citationModal" class="modal-backdrop">
+    <div class="modal-box" style="max-width: 700px;">
+      <div class="modal-header">
+        <span>📜 আইনগত উদ্ধৃতি</span>
+        <button id="closeCitationBtn" class="btn-close">✕</button>
+      </div>
+      <div id="citationContent" style="max-height: 65vh; overflow-y: auto;">
+        <!-- Dynamic content injected here -->
+      </div>
+    </div>
+  </div>
+
+  <!-- Acts List Drawer Modal -->
+  <div id="actsModal" class="modal-backdrop">
+    <div class="modal-box" style="max-width: 700px;">
+      <div class="modal-header">
+        <span>📜 বাংলাদেশ আইন সূচী</span>
+        <button id="closeActsBtn" class="btn-close">✕</button>
+      </div>
+      <input id="actSearchInput" type="text" class="monkey-input" placeholder="শিরোনাম বা বর্ষ দিয়ে আইন অনুসন্ধান করুন..." />
+      <div id="actsListContent" style="max-height: 50vh; overflow-y: auto; display: flex; flex-direction: column; gap: 0.5rem; margin-top: 0.5rem;">
+        <!-- Dynamic acts list -->
+      </div>
+    </div>
+  </div>
+
+  <script src="/static/js/app.js"></script>
+</body>
+</html>
