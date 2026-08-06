@@ -1,0 +1,28 @@
+FROM python:3.11-slim
+
+ENV PYTHONDONTWRITEBYTECODE=1 \
+    PYTHONUNBUFFERED=1
+
+RUN apt-get update \
+    && apt-get install -y --no-install-recommends build-essential gcc ca-certificates \
+    && rm -rf /var/lib/apt/lists/*
+
+WORKDIR /app
+
+COPY requirements.txt /app/
+RUN pip install --no-cache-dir -r requirements.txt
+
+# Copy project
+COPY . /app/
+
+# Use a non-root user
+RUN useradd --create-home appuser \
+    && chown -R appuser /app
+USER appuser
+
+# Vercel (and many container platforms) pass the port in $PORT
+ENV PORT 8000
+EXPOSE 8000
+
+# Start with uvicorn binding to $PORT; rely on Vercel to set PORT at runtime
+CMD ["sh", "-c", "uvicorn main:app --host 0.0.0.0 --port ${PORT:-8000} --loop=uvloop --log-level=info"]
