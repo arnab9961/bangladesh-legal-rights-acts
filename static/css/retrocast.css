@@ -775,6 +775,55 @@ body.chat-active .hero-state {
 }
 
 /* ==========================================================================
+   FOOTER ATTRIBUTION
+   ========================================================================== */
+.app-footer {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-top: 0.85rem;
+  padding: 0.25rem 0 0.1rem 0;
+  font-size: 0.8rem;
+  color: var(--text-tertiary);
+  user-select: none;
+  letter-spacing: 0.01em;
+}
+
+.app-footer .creator-link {
+  color: var(--accent-primary);
+  text-decoration: none;
+  font-weight: 600;
+  margin-left: 0.25rem;
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  transition: color var(--transition-fast), transform var(--transition-fast);
+}
+
+.app-footer .creator-link::after {
+  content: '';
+  position: absolute;
+  bottom: -1px;
+  left: 0;
+  width: 100%;
+  height: 1px;
+  background-color: var(--accent-primary);
+  opacity: 0.35;
+  transition: opacity var(--transition-fast), transform var(--transition-fast);
+  transform-origin: left;
+}
+
+.app-footer .creator-link:hover {
+  color: var(--bd-green-light);
+  transform: translateY(-1px);
+}
+
+.app-footer .creator-link:hover::after {
+  opacity: 1;
+  transform: scaleX(1.05);
+}
+
+/* ==========================================================================
    MODAL DIALOGS (SETTINGS, ACTS, CITATIONS)
    ========================================================================== */
 .modal-backdrop {
