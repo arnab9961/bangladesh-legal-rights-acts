@@ -65,5 +65,6 @@ async def serve_index():
     return HTMLResponse("<h2>Retrocast Legal RAG Service is running. Frontend static/index.html loading...</h2>")
 
 if __name__ == "__main__":
+    # pyrefly: ignore [missing-import]
     import uvicorn
     uvicorn.run("main:app", host="0.0.0.0", port=8000, reload=True)
