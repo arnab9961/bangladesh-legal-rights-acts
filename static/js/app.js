@@ -511,8 +511,9 @@ class BangladeshLegalAI {
         this.appendAssistantMessage(data);
       } else {
         const errPrefix = this.currentLang === "en" ? "Error Processing Request" : "অনুরোধ প্রক্রিয়াকরণে ত্রুটি";
+        const errorDetail = data.error ? `${data.detail}: ${data.error}` : (data.detail || "Server Response Error");
         this.appendAssistantMessage({
-          answer: `⚠️ **${errPrefix}**: ${data.detail || "Server Response Error"}`,
+          answer: `⚠️ **${errPrefix}**: ${errorDetail}`,
           citations: [],
           latency_ms: 0,
           model_used: "error"

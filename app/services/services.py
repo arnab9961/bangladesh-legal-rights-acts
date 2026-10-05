@@ -53,8 +53,12 @@ class RAGEngine:
 
         for act in acts:
             act_title = act.get("act_title", "Unknown Act")
-            act_no = act.get("act_no", "")
-            act_year = act.get("act_year", "")
+            act_no = str(act.get("act_no") or "").strip()
+            if act_no.lower() in ["nan", "none", "null"]:
+                act_no = ""
+            act_year = str(act.get("act_year") or "").strip()
+            if act_year.lower() in ["nan", "none", "null"]:
+                act_year = ""
             footnotes = [fn.get("footnote_text", "") for fn in act.get("footnotes", []) if fn.get("footnote_text")]
             
             sections = act.get("sections", [])
@@ -62,8 +66,8 @@ class RAGEngine:
             
             acts_summary.append(ActItem(
                 act_title=act_title,
-                act_no=str(act_no) if act_no else None,
-                act_year=str(act_year) if act_year else None,
+                act_no=act_no if act_no else None,
+                act_year=act_year if act_year else None,
                 section_count=sec_count
             ))
 
@@ -173,108 +177,123 @@ class RAGEngine:
     def generate_answer(self, req: ChatRequest) -> ChatResponse:
         start_time = time.time()
         
-        # 1. Retrieve relevant legal sections
-        citations = self.retrieve(req.message, top_k=req.top_k)
+        try:
+            # 1. Retrieve relevant legal sections
+            citations = self.retrieve(req.message, top_k=req.top_k)
 
-        # Prepare context text
-        context_blocks = []
-        for idx, cit in enumerate(citations, 1):
-            act_info = f"Act: {cit.act_title}"
-            if cit.act_no:
-                act_info += f" (Act No. {cit.act_no})"
-            if cit.act_year:
-                act_info += f" of {cit.act_year}"
-            
-            block = f"[Source {idx}] {act_info}\nContent: {cit.section_content}"
-            if cit.footnotes:
-                block += "\nFootnotes: " + "; ".join(cit.footnotes)
-            context_blocks.append(block)
+            # Prepare context text
+            context_blocks = []
+            for idx, cit in enumerate(citations, 1):
+                act_info = f"Act: {cit.act_title}"
+                if cit.act_no:
+                    act_info += f" (Act No. {cit.act_no})"
+                if cit.act_year:
+                    act_info += f" of {cit.act_year}"
+                
+                block = f"[Source {idx}] {act_info}\nContent: {cit.section_content}"
+                if cit.footnotes:
+                    block += "\nFootnotes: " + "; ".join(cit.footnotes)
+                context_blocks.append(block)
 
-        context_str = "\n\n".join(context_blocks) if context_blocks else "No direct matching statutory sections found in database."
+            context_str = "\n\n".join(context_blocks) if context_blocks else "No direct matching statutory sections found in database."
 
-        system_prompt = (
-            "You are Bangladesh Legal AI, an elite legal assistant specialized in Bangladesh Laws, Acts, and Constitutional Rights. "
-            "Use the provided Bangladesh Legal Statutory Sources below to answer the user's inquiry accurately, professionally, and clearly. "
-            "Rules:\n"
-            "1. Base your legal reasoning primarily on the retrieved Statutory Sources provided in the context.\n"
-            "2. Cite the exact Act Name, Act Year, and Section/Footnote whenever referencing law.\n"
-            "3. If the user asks in Bengali, respond in clear professional Bengali; if in English, respond in English.\n"
-            "4. Provide practical guidance or next steps where applicable, and include a concise standard legal disclaimer at the end."
-        )
+            system_prompt = (
+                "You are Bangladesh Legal AI, an elite legal assistant specialized in Bangladesh Laws, Acts, and Constitutional Rights. "
+                "Use the provided Bangladesh Legal Statutory Sources below to answer the user's inquiry accurately, professionally, and clearly. "
+                "Rules:\n"
+                "1. Base your legal reasoning primarily on the retrieved Statutory Sources provided in the context.\n"
+                "2. Cite the exact Act Name, Act Year, and Section/Footnote whenever referencing law.\n"
+                "3. If the user asks in Bengali, respond in clear professional Bengali; if in English, respond in English.\n"
+                "4. Provide practical guidance or next steps where applicable, and include a concise standard legal disclaimer at the end."
+            )
 
-        user_prompt = f"RETRIEVED STATUTORY SOURCES:\n{context_str}\n\nUSER QUESTION: {req.message}"
+            user_prompt = f"RETRIEVED STATUTORY SOURCES:\n{context_str}\n\nUSER QUESTION: {req.message}"
 
-        # Determine API Key & Provider
-        api_key = req.api_key or settings.groq_cloud_api or settings.openai_api_key
-        model_name = req.model_name or settings.default_model
+            # Determine API Key & Provider (cleaned of leading/trailing spaces/quotes)
+            raw_key = req.api_key or settings.groq_cloud_api or settings.openai_api_key or ""
+            api_key = raw_key.strip().strip('"').strip("'")
+            model_name = (req.model_name or settings.default_model).strip()
 
-        if not api_key:
+            if not api_key:
+                return ChatResponse(
+                    answer="⚠️ **GROQ CLOUD API KEY MISSING**: Please enter your Groq Cloud API key in the Settings panel (top right ⚙️ icon) or in your `.env` file as `groq_cloud_api=gsk_...`.",
+                    citations=citations,
+                    latency_ms=round((time.time() - start_time) * 1000, 2),
+                    model_used="none",
+                    total_sources=len(citations)
+                )
+
+            # Call LLM via Groq or OpenAI client
+            answer = ""
+            try:
+                if "gpt-4" in model_name.lower() or model_name.startswith("gpt-"):
+                    # OpenAI Client
+                    client = openai.OpenAI(api_key=api_key)
+                    response = client.chat.completions.create(
+                        model=model_name,
+                        messages=[
+                            {"role": "system", "content": system_prompt},
+                            {"role": "user", "content": user_prompt}
+                        ],
+                        temperature=req.temperature,
+                        max_tokens=1500
+                    )
+                    answer = response.choices[0].message.content or ""
+                else:
+                    # Groq Client (using official groq SDK with OpenAI-compatible fallback)
+                    try:
+                        client = groq.Groq(api_key=api_key)
+                        response = client.chat.completions.create(
+                            model=model_name,
+                            messages=[
+                                {"role": "system", "content": system_prompt},
+                                {"role": "user", "content": user_prompt}
+                            ],
+                            temperature=req.temperature,
+                            max_tokens=1500
+                        )
+                        answer = response.choices[0].message.content or ""
+                    except Exception:
+                        # Fallback to OpenAI SDK pointed to Groq base_url
+                        client = openai.OpenAI(api_key=api_key, base_url="https://api.groq.com/openai/v1")
+                        response = client.chat.completions.create(
+                            model=model_name,
+                            messages=[
+                                {"role": "system", "content": system_prompt},
+                                {"role": "user", "content": user_prompt}
+                            ],
+                            temperature=req.temperature,
+                            max_tokens=1500
+                        )
+                        answer = response.choices[0].message.content or ""
+
+            except Exception as e:
+                answer = (
+                    f"⚠️ **অনুরোধ প্রক্রিয়া করতে সমস্যা হয়েছে**: {str(e)}\n\n"
+                    "অনুগ্রহ করে সেটিংস প্যানেলে আপনার Groq/OpenAI API কী অথবা মডেল নির্বাচন পরীক্ষা করুন।"
+                )
+
+            if not answer:
+                answer = "কোনো প্রতিক্রিয়া পাওয়া যায়নি। অনুগ্রহ করে পুনরায় চেষ্টা করুন।"
+
+            latency = round((time.time() - start_time) * 1000, 2)
             return ChatResponse(
-                answer="⚠️ **GROQ CLOUD API KEY MISSING**: Please enter your Groq Cloud API key in the Retrocast Settings panel (top right gear icon) to query the LLM model.",
+                answer=answer,
                 citations=citations,
-                latency_ms=round((time.time() - start_time) * 1000, 2),
-                model_used="none",
+                latency_ms=latency,
+                model_used=model_name,
                 total_sources=len(citations)
             )
 
-        # Call LLM via Groq or OpenAI client
-        answer = ""
-        try:
-            if "gpt-4" in model_name.lower() or model_name.startswith("gpt-"):
-                # OpenAI Client
-                client = openai.OpenAI(api_key=api_key)
-                response = client.chat.completions.create(
-                    model=model_name,
-                    messages=[
-                        {"role": "system", "content": system_prompt},
-                        {"role": "user", "content": user_prompt}
-                    ],
-                    temperature=req.temperature,
-                    max_tokens=1500
-                )
-                answer = response.choices[0].message.content
-            else:
-                # Groq Client (using official groq SDK or OpenAI compatible endpoint)
-                try:
-                    client = groq.Groq(api_key=api_key)
-                    response = client.chat.completions.create(
-                        model=model_name,
-                        messages=[
-                            {"role": "system", "content": system_prompt},
-                            {"role": "user", "content": user_prompt}
-                        ],
-                        temperature=req.temperature,
-                        max_tokens=1500
-                    )
-                    answer = response.choices[0].message.content
-                except Exception:
-                    # Fallback to OpenAI SDK pointed to Groq base_url
-                    client = openai.OpenAI(api_key=api_key, base_url="https://api.groq.com/openai/v1")
-                    response = client.chat.completions.create(
-                        model=model_name,
-                        messages=[
-                            {"role": "system", "content": system_prompt},
-                            {"role": "user", "content": user_prompt}
-                        ],
-                        temperature=req.temperature,
-                        max_tokens=1500
-                    )
-                    answer = response.choices[0].message.content
-
-        except Exception as e:
-            answer = (
-                f"⚠️ **অনুরোধ প্রক্রিয়া করতে সমস্যা হয়েছে**: {str(e)}\n\n"
-                "অনুগ্রহ করে সেটিংস প্যানেলে আপনার Groq/OpenAI API কী অথবা মডেল নির্বাচন পরীক্ষা করুন।"
+        except Exception as top_err:
+            latency = round((time.time() - start_time) * 1000, 2)
+            return ChatResponse(
+                answer=f"⚠️ **অভ্যন্তরীণ ত্রুটি**: {str(top_err)}",
+                citations=[],
+                latency_ms=latency,
+                model_used="error",
+                total_sources=0
             )
-
-        latency = round((time.time() - start_time) * 1000, 2)
-        return ChatResponse(
-            answer=answer,
-            citations=citations,
-            latency_ms=latency,
-            model_used=model_name,
-            total_sources=len(citations)
-        )
 
 # Global Singleton Instance
 rag_engine = RAGEngine()
