@@ -163,11 +163,9 @@ class RAGEngine:
 
     def get_supported_models(self) -> List[ModelInfo]:
         return [
-            ModelInfo(id="llama-3.3-70b-versatile", name="Llama 3.3 70B (Groq)", provider="Groq Cloud", is_default=True),
-            ModelInfo(id="llama3-70b-8192", name="Llama 3 70B (Groq)", provider="Groq Cloud"),
-            ModelInfo(id="mixtral-80b-32768", name="Mixtral 8x7B (Groq)", provider="Groq Cloud"),
-            ModelInfo(id="gemma2-9b-it", name="Gemma 2 9B (Groq)", provider="Groq Cloud"),
-            ModelInfo(id="deepseek-r1-distill-llama-70b", name="DeepSeek R1 Distill 70B (Groq)", provider="Groq Cloud"),
+            ModelInfo(id="openai/gpt-oss-120b", name="GPT-OSS 120B (Groq)", provider="Groq Cloud", is_default=True),
+            ModelInfo(id="openai/gpt-oss-20b", name="GPT-OSS 20B (Groq)", provider="Groq Cloud"),
+            ModelInfo(id="qwen/qwen3.8-27b", name="Qwen 3.8 27B (Groq)", provider="Groq Cloud"),
             ModelInfo(id="gpt-4o", name="GPT-4o (OpenAI)", provider="OpenAI"),
             ModelInfo(id="gpt-4o-mini", name="GPT-4o Mini (OpenAI)", provider="OpenAI"),
         ]
@@ -195,15 +193,13 @@ class RAGEngine:
         context_str = "\n\n".join(context_blocks) if context_blocks else "No direct matching statutory sections found in database."
 
         system_prompt = (
-            "You are Retrocast Legal AI, an elite legal assistant specialized in Bangladesh Laws, Acts, and Constitutional Rights. "
-            "Your theme is vintage broadcast intelligence -- precise, structured, authoritative, and helpful.\n\n"
-            "Use the provided Bangladesh Legal Statutory Sources below to answer the user's inquiry accurately. "
+            "You are Bangladesh Legal AI, an elite legal assistant specialized in Bangladesh Laws, Acts, and Constitutional Rights. "
+            "Use the provided Bangladesh Legal Statutory Sources below to answer the user's inquiry accurately, professionally, and clearly. "
             "Rules:\n"
             "1. Base your legal reasoning primarily on the retrieved Statutory Sources provided in the context.\n"
             "2. Cite the exact Act Name, Act Year, and Section/Footnote whenever referencing law.\n"
-            "3. If the retrieved context contains relevant laws, explain their application clearly.\n"
-            "4. Provide practical guidance or next steps where applicable, while adding a standard legal disclaimer at the end.\n"
-            "5. Maintain a clean retro-broadcast legal tone."
+            "3. If the user asks in Bengali, respond in clear professional Bengali; if in English, respond in English.\n"
+            "4. Provide practical guidance or next steps where applicable, and include a concise standard legal disclaimer at the end."
         )
 
         user_prompt = f"RETRIEVED STATUTORY SOURCES:\n{context_str}\n\nUSER QUESTION: {req.message}"
@@ -267,8 +263,8 @@ class RAGEngine:
 
         except Exception as e:
             answer = (
-                f"🚨 **BROADCAST ERROR / API CALL FAILED**: {str(e)}\n\n"
-                "Please verify your API key in the Retrocast Control Settings or select another model."
+                f"⚠️ **অনুরোধ প্রক্রিয়া করতে সমস্যা হয়েছে**: {str(e)}\n\n"
+                "অনুগ্রহ করে সেটিংস প্যানেলে আপনার Groq/OpenAI API কী অথবা মডেল নির্বাচন পরীক্ষা করুন।"
             )
 
         latency = round((time.time() - start_time) * 1000, 2)

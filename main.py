@@ -4,6 +4,9 @@ from fastapi import FastAPI, Request
 from fastapi.staticfiles import StaticFiles
 from fastapi.responses import HTMLResponse, FileResponse
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.responses import JSONResponse
+from fastapi.requests import Request as FastAPIRequest
+import traceback
 
 from app.services.route import router as api_router
 from app.services.services import rag_engine
@@ -21,6 +24,15 @@ app = FastAPI(
     version="1.0.0",
     lifespan=lifespan
 )
+
+
+@app.exception_handler(Exception)
+async def generic_exception_handler(request: FastAPIRequest, exc: Exception):
+    traceback.print_exc()
+    return JSONResponse(status_code=500, content={
+        "detail": "Internal Server Error",
+        "error": str(exc)
+    })
 
 # Enable CORS
 app.add_middleware(
