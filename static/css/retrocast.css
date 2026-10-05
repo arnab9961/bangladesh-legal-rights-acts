@@ -378,7 +378,7 @@ body.chat-active .law-center-symbol {
   display: flex;
   flex-direction: column;
   gap: 1.5rem;
-  padding: 0.5rem 0 2rem 0;
+  padding: 0.5rem 0 6.5rem 0;
   overflow-y: auto;
 }
 
@@ -394,7 +394,8 @@ body.chat-active .law-center-symbol {
   transition: opacity 0.3s ease;
 }
 
-body.chat-active .hero-state {
+body.chat-active .hero-state,
+body.chat-active .presets-tray {
   display: none;
 }
 
@@ -566,6 +567,50 @@ body.chat-active .hero-state {
   padding: 2px 5px;
   border-radius: 4px;
   font-size: 0.88em;
+}
+
+/* Markdown Legal Tables */
+.table-responsive {
+  width: 100%;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+  margin: 1rem 0;
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--border-subtle);
+  background: var(--bg-surface-solid);
+}
+
+.legal-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.88rem;
+  text-align: left;
+  min-width: 460px;
+}
+
+.legal-table th {
+  background: var(--bg-surface-elevated);
+  color: var(--text-primary);
+  font-weight: 600;
+  padding: 0.65rem 0.85rem;
+  border-bottom: 2px solid var(--border-strong);
+  white-space: nowrap;
+}
+
+.legal-table td {
+  padding: 0.65rem 0.85rem;
+  border-bottom: 1px solid var(--border-subtle);
+  color: var(--text-primary);
+  line-height: 1.55;
+  vertical-align: top;
+}
+
+.legal-table tr:last-child td {
+  border-bottom: none;
+}
+
+.legal-table tr:hover td {
+  background: var(--bg-hover);
 }
 
 /* Citations Tray */
@@ -1100,35 +1145,488 @@ body.chat-active .hero-state {
   background: #059669;
 }
 
-/* Responsive adjustments */
-@media (max-width: 640px) {
+/* ==========================================================================
+   COMPREHENSIVE RESPONSIVE DESIGN (MOBILE & TABLET)
+   ========================================================================== */
+
+/* Tablet & Mobile (<= 768px) */
+@media (max-width: 768px) {
   .header-container {
-    padding: 0.75rem 1rem;
+    padding: 0.6rem 1rem;
+    gap: 0.5rem;
   }
-  
-  .status-pill {
+
+  .brand-group {
+    gap: 0.5rem;
+  }
+
+  .brand-name {
+    font-size: 0.98rem;
+  }
+
+  .header-actions {
+    gap: 0.35rem;
+  }
+
+  /* Compact touch icon buttons */
+  #actsBtnText, 
+  #settingsBtnText {
     display: none;
   }
 
+  .icon-btn {
+    width: 36px;
+    height: 36px;
+    padding: 0;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: var(--radius-sm);
+    gap: 0;
+  }
+
+  .icon-btn svg {
+    width: 17px;
+    height: 17px;
+  }
+
+  .lang-switcher {
+    margin-right: 0.15rem;
+    padding: 1px;
+  }
+
+  .lang-btn {
+    font-size: 0.74rem;
+    padding: 0.22rem 0.55rem;
+  }
+
   .main-content {
-    padding: 1rem 0.75rem 1.5rem 0.75rem;
+    padding: 0.85rem 0.85rem 0 0.85rem;
+    max-width: 100%;
+  }
+
+  .chat-stream {
+    gap: 1.15rem;
+    padding: 0.5rem 0 7rem 0;
+  }
+
+  .hero-state {
+    min-height: 32vh;
+    padding: 1.5rem 0.5rem 0.5rem 0.5rem;
+  }
+
+  .hero-title {
+    font-size: 1.3rem;
+  }
+
+  .hero-subtitle {
+    font-size: 0.88rem;
+    max-width: 100%;
+  }
+
+  .law-center-symbol svg {
+    width: 200px;
+    height: 200px;
+    max-width: 60vw;
+    max-height: 60vw;
+  }
+
+  .message-row.user .message-body {
+    max-width: 88%;
+    font-size: 0.94rem;
+    padding: 0.75rem 0.95rem;
+  }
+
+  .message-row.assistant .message-body {
+    padding: 1rem 1.15rem;
+  }
+
+  .message-meta {
+    flex-wrap: wrap;
+    gap: 0.45rem;
+    margin-bottom: 0.75rem;
+    padding-bottom: 0.55rem;
+  }
+
+  .meta-stats {
+    font-size: 0.72rem;
+  }
+
+  .message-text {
+    font-size: 0.94rem;
+    line-height: 1.65;
+  }
+
+  .citations-tray {
+    margin-top: 0.85rem;
+    padding-top: 0.65rem;
+  }
+
+  .citation-pill {
+    max-width: 100%;
+    white-space: normal;
+  }
+
+  /* Sticky Input Container with safe area support */
+  .input-section {
+    bottom: 0;
+    padding-bottom: max(0.5rem, env(safe-area-inset-bottom, 0px));
+  }
+
+  .input-container {
+    border-radius: var(--radius-md);
+    padding: 0.35rem 0.4rem 0.35rem 0.85rem;
+  }
+
+  .query-input {
+    font-size: 16px; /* Prevents auto-zoom on iOS */
+    padding: 0.5rem 0.3rem;
+    min-height: 22px;
+  }
+
+  .btn-send {
+    width: 38px;
+    height: 38px;
+  }
+
+  /* Horizontal swipeable chip bar for presets */
+  .presets-tray {
+    flex-wrap: nowrap;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    justify-content: flex-start;
+    padding: 0.35rem 0.25rem 0.5rem 0.25rem;
+    margin-top: 0.6rem;
+    gap: 0.4rem;
+    scrollbar-width: none;
+  }
+
+  .presets-tray::-webkit-scrollbar {
+    display: none;
+  }
+
+  .preset-chip {
+    white-space: nowrap;
+    flex-shrink: 0;
+    font-size: 0.78rem;
+    padding: 0.35rem 0.75rem;
+  }
+
+  .app-footer {
+    margin-top: 0.5rem;
+    font-size: 0.76rem;
+  }
+
+  /* Modals on tablets & mobile */
+  .modal-backdrop {
+    padding: 0.75rem;
+  }
+
+  .modal-card {
+    max-height: 90vh;
+    width: 100%;
+    max-width: 100%;
+  }
+
+  .modal-card.modal-lg {
+    max-width: 100%;
+    width: 100%;
+  }
+
+  .modal-header {
+    padding: 0.85rem 1.15rem;
+  }
+
+  .modal-body {
+    padding: 1rem 1.15rem;
+    gap: 0.95rem;
+  }
+
+  .modal-footer {
+    padding: 0.75rem 1.15rem;
+  }
+
+  .acts-scroll-area {
+    max-height: 56vh;
+  }
+}
+
+/* Smartphone Small Viewport (<= 480px) */
+@media (max-width: 480px) {
+  .header-container {
+    padding: 0.5rem 0.75rem;
+    gap: 0.35rem;
+  }
+
+  .brand-group {
+    gap: 0.4rem;
+  }
+
+  .brand-icon {
+    width: 28px;
+    height: 28px;
+    font-size: 1rem;
+  }
+
+  .brand-name {
+    font-size: 0.9rem;
+  }
+
+  .brand-tag {
+    font-size: 0.65rem;
+    padding: 1px 4px;
+  }
+
+  .header-actions {
+    gap: 0.25rem;
+  }
+
+  .icon-btn {
+    width: 34px;
+    height: 34px;
+  }
+
+  .icon-btn svg {
+    width: 16px;
+    height: 16px;
+  }
+
+  .lang-switcher {
+    margin-right: 0.1rem;
+    padding: 1px;
+  }
+
+  .lang-btn {
+    font-size: 0.7rem;
+    padding: 0.18rem 0.45rem;
+  }
+
+  .main-content {
+    padding: 0.5rem 0.6rem 0 0.6rem;
+  }
+
+  .chat-stream {
+    gap: 0.9rem;
+    padding: 0.25rem 0 7rem 0;
+  }
+
+  .hero-state {
+    min-height: 28vh;
+    padding: 1.25rem 0.25rem 0.25rem 0.25rem;
+  }
+
+  .hero-title {
+    font-size: 1.18rem;
+    line-height: 1.35;
+  }
+
+  .hero-subtitle {
+    font-size: 0.82rem;
+    line-height: 1.45;
+  }
+
+  .law-center-symbol svg {
+    width: 150px;
+    height: 150px;
+    max-width: 65vw;
+    max-height: 65vw;
   }
 
   .message-row.user .message-body {
     max-width: 92%;
+    padding: 0.65rem 0.85rem;
+    font-size: 0.9rem;
+    border-radius: var(--radius-md) var(--radius-md) 2px var(--radius-md);
   }
 
-  .law-center-symbol svg {
-    width: 180px;
-    height: 180px;
+  .message-row.assistant .message-body {
+    padding: 0.85rem 0.85rem;
+    border-radius: var(--radius-md);
   }
 
-  .hero-title {
-    font-size: 1.25rem;
+  .meta-identity {
+    font-size: 0.76rem;
+  }
+
+  .meta-stats {
+    font-size: 0.68rem;
+    gap: 0.35rem;
+  }
+
+  .message-text {
+    font-size: 0.9rem;
+    line-height: 1.6;
+  }
+
+  .message-text ul, 
+  .message-text ol {
+    padding-left: 1.15rem;
+    margin: 0.5rem 0;
+  }
+
+  .message-text li {
+    margin-bottom: 0.25rem;
+  }
+
+  .citation-pill {
+    font-size: 0.72rem;
+    padding: 0.25rem 0.45rem;
+    gap: 0.25rem;
+  }
+
+  .citation-pill .pill-score {
+    font-size: 0.65rem;
+  }
+
+  .input-section {
+    padding-bottom: max(0.4rem, env(safe-area-inset-bottom, 0px));
+  }
+
+  .input-container {
+    padding: 0.25rem 0.3rem 0.25rem 0.65rem;
+  }
+
+  .query-input {
+    font-size: 16px;
+    padding: 0.4rem 0.2rem;
+  }
+
+  .btn-send {
+    width: 36px;
+    height: 36px;
+    border-radius: var(--radius-sm);
+  }
+
+  .btn-send svg {
+    width: 15px;
+    height: 15px;
+  }
+
+  .presets-tray {
+    padding: 0.25rem 0.1rem 0.4rem 0.1rem;
+    margin-top: 0.45rem;
+    gap: 0.3rem;
   }
 
   .preset-chip {
-    font-size: 0.76rem;
+    font-size: 0.74rem;
     padding: 0.3rem 0.6rem;
+  }
+
+  .app-footer {
+    margin-top: 0.4rem;
+    font-size: 0.72rem;
+  }
+
+  /* Modals on Small Phone */
+  .modal-backdrop {
+    padding: 0.35rem;
+  }
+
+  .modal-card {
+    max-height: 94vh;
+    border-radius: var(--radius-md);
+  }
+
+  .modal-header {
+    padding: 0.75rem 0.85rem;
+  }
+
+  .modal-title {
+    font-size: 0.92rem;
+  }
+
+  .modal-body {
+    padding: 0.85rem;
+    gap: 0.75rem;
+  }
+
+  .modal-footer {
+    padding: 0.65rem 0.85rem;
+  }
+
+  .acts-search-input {
+    font-size: 0.88rem;
+    padding: 0.55rem 0.7rem;
+  }
+
+  .acts-scroll-area {
+    max-height: 60vh;
+    gap: 0.35rem;
+  }
+
+  .act-row-item {
+    padding: 0.55rem 0.7rem;
+    gap: 0.5rem;
+  }
+
+  .act-title-text {
+    font-size: 0.84rem;
+    line-height: 1.35;
+  }
+
+  .act-sub-meta {
+    font-size: 0.7rem;
+  }
+
+  .act-count-badge {
+    font-size: 0.68rem;
+    padding: 2px 5px;
+  }
+
+  .citation-view-title {
+    font-size: 1rem;
+    line-height: 1.35;
+  }
+
+  .citation-view-sub {
+    font-size: 0.74rem;
+  }
+
+  .citation-body-card {
+    padding: 0.75rem;
+    font-size: 0.86rem;
+    line-height: 1.55;
+  }
+
+  .citation-footnotes-card {
+    padding: 0.65rem 0.8rem;
+    font-size: 0.78rem;
+  }
+
+  .theme-grid {
+    grid-template-columns: 1fr 1fr;
+    gap: 0.45rem;
+  }
+
+  .theme-chip {
+    font-size: 0.78rem;
+    padding: 0.5rem;
+  }
+}
+
+/* Extra Small (<= 360px) */
+@media (max-width: 360px) {
+  .header-container {
+    padding: 0.4rem 0.5rem;
+  }
+
+  .brand-name {
+    font-size: 0.84rem;
+  }
+
+  .icon-btn {
+    width: 30px;
+    height: 30px;
+  }
+
+  .icon-btn svg {
+    width: 14px;
+    height: 14px;
+  }
+
+  .lang-btn {
+    font-size: 0.68rem;
+    padding: 0.15rem 0.38rem;
   }
 }

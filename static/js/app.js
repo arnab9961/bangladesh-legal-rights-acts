@@ -689,10 +689,12 @@ class BangladeshLegalAI {
         return;
       }
 
-      this.actsListContent.innerHTML = acts.map(a => `
-        <div class="act-row-item" onclick="app.selectActPrompt('${this.escapeHtml(a.act_title)}')">
+      this.actsListContent.innerHTML = acts.map(a => {
+        const displayTitle = (a.act_title || '').replace(/^(\d+)([A-Za-z\u0980-\u09FF])/, '$1 $2');
+        return `
+        <div class="act-row-item" onclick="app.selectActPrompt('${this.escapeHtml(displayTitle)}')">
           <div>
-            <div class="act-title-text">${this.escapeHtml(a.act_title)}</div>
+            <div class="act-title-text">${this.escapeHtml(displayTitle)}</div>
             <div class="act-sub-meta">
               ${a.act_year ? t.yearLabel + ' ' + a.act_year : ''} 
               ${a.act_no ? '| ' + t.actNoLabel + ' ' + a.act_no : ''}
@@ -700,7 +702,8 @@ class BangladeshLegalAI {
           </div>
           <span class="act-count-badge">${a.section_count} ${t.secBadge}</span>
         </div>
-      `).join('');
+      `;
+      }).join('');
     } catch (e) {
       this.actsListContent.innerHTML = `<div style="padding: 1rem; color: var(--danger);">${t.actsLoadError}</div>`;
     }
@@ -826,6 +829,31 @@ class BangladeshLegalAI {
     html = html.replace(/```([\s\S]*?)```/g, '<pre><code>$1</code></pre>');
     // Inline code
     html = html.replace(/`([^`]+)`/g, '<code>$1</code>');
+
+    // Markdown Tables
+    html = html.replace(/((?:^|\n)\|[^\n]+\|[ \t]*(?:\n\|[^\n]+\|[ \t]*)+)/g, (match) => {
+      const rows = match.trim().split(/\r?\n/).map(r => r.trim()).filter(r => r.startsWith('|') && r.endsWith('|'));
+      if (rows.length < 2) return match;
+      
+      const parseCells = (row) => row.slice(1, -1).split('|').map(c => c.trim());
+      const isSep = (r) => /^\|(?:\s*:?-{2,}:?\s*\|)+$/.test(r);
+      let thead = '';
+      let bodyRows = rows;
+      
+      if (rows.length >= 2 && isSep(rows[1])) {
+        const headerCells = parseCells(rows[0]);
+        thead = '<thead><tr>' + headerCells.map(c => `<th>${c}</th>`).join('') + '</tr></thead>';
+        bodyRows = rows.slice(2);
+      }
+      
+      const tbody = '<tbody>' + bodyRows.map(r => {
+        if (isSep(r)) return '';
+        const cells = parseCells(r);
+        return '<tr>' + cells.map(c => `<td>${c}</td>`).join('') + '</tr>';
+      }).filter(r => r.length > 0).join('') + '</tbody>';
+      
+      return `<div class="table-responsive"><table class="legal-table">${thead}${tbody}</table></div>`;
+    });
 
     // Bullet points
     html = html.replace(/^\s*[-*•]\s+(.*?)$/gm, '<li>$1</li>');
