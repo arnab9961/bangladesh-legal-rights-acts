@@ -7,8 +7,8 @@ __pycache__/
 .Python
 .git
 .gitignore
-data/processed_law.json
-data/meta.json
+data/acts
+data/cleaned_law
 data/filtered_act_list.csv
 node_modules
 build

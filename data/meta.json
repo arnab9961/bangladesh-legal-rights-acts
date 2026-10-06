@@ -1,0 +1,11 @@
+{
+  "total_acts": 1484,
+  "successful_files": 1484,
+  "failed_files": 0,
+  "total_sections": 35633,
+  "total_footnotes": 14523,
+  "source_directory": "Data/acts",
+  "created_timestamp": "2025-07-19 02:57:43",
+  "processing_time_minutes": 0.31,
+  "description": "Combined Bangladesh Laws Database"
+}

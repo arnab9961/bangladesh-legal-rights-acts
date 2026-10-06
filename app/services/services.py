@@ -1,4 +1,5 @@
 import json
+import gzip
 import os
 import time
 import re
@@ -33,13 +34,43 @@ class RAGEngine:
         print("Initializing Bangladesh Legal RAG Engine...")
         start_time = time.time()
         
-        json_path = settings.data_json_path
-        if not os.path.exists(json_path):
-            print(f"Warning: Data file not found at {json_path}")
+        # Check candidate dataset paths (both gzipped and raw json)
+        candidates = [
+            getattr(settings, "data_gz_path", None),
+            settings.data_json_path,
+            os.path.join(os.getcwd(), "data", "processed_law.json.gz"),
+            os.path.join(os.getcwd(), "data", "processed_law.json"),
+            os.path.join(os.path.dirname(__file__), "..", "..", "data", "processed_law.json.gz"),
+            os.path.join(os.path.dirname(__file__), "..", "..", "data", "processed_law.json"),
+            "/app/data/processed_law.json.gz",
+            "/app/data/processed_law.json",
+        ]
+
+        json_path = None
+        is_gzipped = False
+        for p in candidates:
+            if p and os.path.exists(p):
+                json_path = os.path.abspath(p)
+                is_gzipped = p.endswith(".gz")
+                break
+
+        if not json_path:
+            print(f"Warning: Legal dataset not found. Checked: {[c for c in candidates if c][:3]}")
+            self.is_initialized = True
             return
 
-        with open(json_path, "r", encoding="utf-8") as f:
-            data = json.load(f)
+        try:
+            print(f"Loading legal dataset from {json_path}...")
+            if is_gzipped:
+                with gzip.open(json_path, "rt", encoding="utf-8") as f:
+                    data = json.load(f)
+            else:
+                with open(json_path, "r", encoding="utf-8") as f:
+                    data = json.load(f)
+        except Exception as read_err:
+            print(f"Error reading dataset at {json_path}: {read_err}")
+            self.is_initialized = True
+            return
 
         meta = data.get("metadata", {})
         self.total_acts = meta.get("total_acts", 0)
@@ -100,14 +131,20 @@ class RAGEngine:
         self.total_sections = len(sections_db)
         self.corpus_tokens = corpus_tokens
 
-        # Build BM25 Index
-        print("Building BM25 Index...")
-        self.bm25 = BM25Okapi(corpus_tokens)
+        if corpus_tokens and len(corpus_tokens) > 0:
+            # Build BM25 Index
+            print("Building BM25 Index...")
+            self.bm25 = BM25Okapi(corpus_tokens)
 
-        # Build TF-IDF Index for dense lexical cosine similarity
-        print("Building TF-IDF Vector Space Matrix...")
-        self.vectorizer = TfidfVectorizer(max_features=25000, stop_words='english', ngram_range=(1, 2))
-        self.tfidf_matrix = self.vectorizer.fit_transform(corpus_texts)
+            # Build TF-IDF Index for dense lexical cosine similarity
+            print("Building TF-IDF Vector Space Matrix...")
+            self.vectorizer = TfidfVectorizer(max_features=25000, stop_words='english', ngram_range=(1, 2))
+            self.tfidf_matrix = self.vectorizer.fit_transform(corpus_texts)
+        else:
+            print("Warning: Corpus is empty. Search indices not initialized.")
+            self.bm25 = None
+            self.vectorizer = None
+            self.tfidf_matrix = None
 
         self.is_initialized = True
         elapsed = time.time() - start_time
@@ -120,6 +157,10 @@ class RAGEngine:
     def retrieve(self, query: str, top_k: int = 5) -> List[Citation]:
         if not self.is_initialized:
             self.initialize()
+
+        # Guard against missing or uninitialized index
+        if self.bm25 is None or self.vectorizer is None or self.tfidf_matrix is None or not self.sections_db:
+            return []
 
         query_tokens = self._tokenize(query)
         if not query_tokens:

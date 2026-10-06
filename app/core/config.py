@@ -29,6 +29,7 @@ class Settings(BaseSettings):
     ])
     default_model: str = "arnab9961/bangladesh-law-smollm2"
     data_json_path: str = os.path.join(os.path.dirname(__file__), "..", "..", "data", "processed_law.json")
+    data_gz_path: str = os.path.join(os.path.dirname(__file__), "..", "..", "data", "processed_law.json.gz")
     meta_json_path: str = os.path.join(os.path.dirname(__file__), "..", "..", "data", "meta.json")
 
     class Config:

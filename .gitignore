@@ -191,10 +191,13 @@ wandb/
 mlruns/
 
 # Data files
-data/
+data/*
+!data/processed_law.json.gz
+!data/meta.json
 datasets/
 *.csv
 *.json
+!data/meta.json
 *.parquet
 *.feather
 *.npz
