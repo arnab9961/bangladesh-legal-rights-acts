@@ -20,7 +20,7 @@ async def lifespan(app: FastAPI):
 
 app = FastAPI(
     title="Retrocast Legal RAG - Bangladesh Laws & Rights",
-    description="Vintage Broadcast Themed RAG Chatbot powered by Bangladesh Laws Database & Groq/OpenAI LLMs",
+    description="Vintage Broadcast Themed RAG Chatbot powered by Bangladesh Laws Database & Hugging Face (arnab9961/bangladesh-law-smollm2)",
     version="1.0.0",
     lifespan=lifespan
 )

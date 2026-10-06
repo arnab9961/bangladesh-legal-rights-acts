@@ -130,25 +130,21 @@
       </div>
       <div class="modal-body">
         <div class="form-group">
-          <label class="form-label" id="apiKeyLabel" for="apiKeyInput">Groq / OpenAI API Key</label>
+          <label class="form-label" id="apiKeyLabel" for="apiKeyInput">Hugging Face Access Token (hf_token)</label>
           <input 
             id="apiKeyInput" 
             type="password" 
             class="form-input" 
-            placeholder="gsk_... or sk-..."
+            placeholder="hf_..."
             autocomplete="off"
           />
-          <span class="form-hint" id="apiKeyHint">আপনার ব্রাউজারে সুরক্ষিত থাকবে। ফাঁকা রাখলে ডিফল্ট সার্ভার কী ব্যবহৃত হবে।</span>
+          <span class="form-hint" id="apiKeyHint">আপনার ব্রাউজারে সুরক্ষিত থাকবে। ফাঁকা রাখলে সার্ভারের hf_token ব্যবহৃত হবে।</span>
         </div>
 
         <div class="form-group">
-          <label class="form-label" id="modelSelectLabel" for="modelSelect">LLM মডেল</label>
+          <label class="form-label" id="modelSelectLabel" for="modelSelect">Hugging Face মডেল</label>
           <select id="modelSelect" class="form-select">
-            <option value="openai/gpt-oss-120b" selected>GPT-OSS 120B (Groq)</option>
-            <option value="openai/gpt-oss-20b">GPT-OSS 20B (Groq)</option>
-            <option value="qwen/qwen3.8-27b">Qwen 3.8 27B (Groq)</option>
-            <option value="gpt-4o">GPT-4o (OpenAI)</option>
-            <option value="gpt-4o-mini">GPT-4o Mini (OpenAI)</option>
+            <option value="arnab9961/bangladesh-law-smollm2" selected>Bangladesh Law SmolLM2 (arnab9961/bangladesh-law-smollm2)</option>
           </select>
         </div>
 

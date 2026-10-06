@@ -20,9 +20,9 @@ const I18N = {
     placeholder: "একটি আইনগত ধারা বা অধিকার সংক্রান্ত প্রশ্ন লিখুন...",
     sendTitle: "অনুসন্ধান ও বিশ্লেষণ",
     settingsTitle: "⚙️ সেটিংস",
-    apiKeyLabel: "Groq / OpenAI API Key",
-    apiKeyHint: "আপনার ব্রাউজারে সুরক্ষিত থাকবে। ফাঁকা রাখলে ডিফল্ট সার্ভার কী ব্যবহৃত হবে।",
-    modelLabel: "LLM মডেল",
+    apiKeyLabel: "হাগিং ফেস এক্সেস টোকেন (hf_token)",
+    apiKeyHint: "আপনার ব্রাউজারে সুরক্ষিত থাকবে। ফাঁকা রাখলে .env এর hf_token ব্যবহৃত হবে।",
+    modelLabel: "Hugging Face মডেল",
     topKLabel: "আইনি ধারা উদ্ধৃতি সংখ্যা (Top-K)",
     topKHint: "প্রতিটি জবাবে সর্বোচ্চ কয়টি আইনি ধারা বিশ্লেষণ করা হবে (১ থেকে ২০)।",
     saveSettings: "সেটিংস সংরক্ষণ",
@@ -74,9 +74,9 @@ const I18N = {
     placeholder: "Ask a legal question (e.g. fundamental rights, labor laws, criminal trespass)...",
     sendTitle: "Search & Analyze",
     settingsTitle: "⚙️ Settings",
-    apiKeyLabel: "Groq / OpenAI API Key",
-    apiKeyHint: "Stored securely in your browser. Leave empty to use default server key.",
-    modelLabel: "LLM Model",
+    apiKeyLabel: "Hugging Face Access Token (hf_token)",
+    apiKeyHint: "Stored securely in your browser. Leave empty to use server hf_token from .env.",
+    modelLabel: "Hugging Face Model",
     topKLabel: "Citations Retrieval Count (Top-K)",
     topKHint: "Maximum statutory clauses analyzed per response (1 to 20).",
     saveSettings: "Save Settings",
@@ -122,8 +122,12 @@ const I18N = {
 
 class BangladeshLegalAI {
   constructor() {
-    this.apiKey = localStorage.getItem("legal_groq_api_key") || "";
-    this.modelName = localStorage.getItem("legal_model_name") || "openai/gpt-oss-120b";
+    this.apiKey = localStorage.getItem("legal_hf_token") || localStorage.getItem("legal_groq_api_key") || "";
+    let storedModel = localStorage.getItem("legal_model_name");
+    if (!storedModel || storedModel.includes("openai") || storedModel.includes("groq") || storedModel.includes("qwen") || storedModel.includes("gpt")) {
+      storedModel = "arnab9961/bangladesh-law-smollm2";
+    }
+    this.modelName = storedModel;
     
     let storedTheme = localStorage.getItem("legal_theme");
     if (!storedTheme || !["dark", "light", "carbon"].includes(storedTheme)) {
@@ -751,10 +755,11 @@ class BangladeshLegalAI {
 
   saveSettings() {
     this.apiKey = this.apiKeyInput.value.trim();
-    this.modelName = this.modelSelect.value;
+    this.modelName = this.modelSelect.value || "arnab9961/bangladesh-law-smollm2";
     this.topK = parseInt(this.topKInput.value, 10) || 5;
 
-    localStorage.setItem("legal_groq_api_key", this.apiKey);
+    localStorage.setItem("legal_hf_token", this.apiKey);
+    localStorage.removeItem("legal_groq_api_key");
     localStorage.setItem("legal_model_name", this.modelName);
     localStorage.setItem("legal_top_k", this.topK.toString());
 

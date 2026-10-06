@@ -19,9 +19,15 @@ def _get_cleaned_env(names: list[str]) -> str:
     return ""
 
 class Settings(BaseSettings):
-    groq_cloud_api: str = _get_cleaned_env(["groq_cloud_api", "GROQ_API_KEY", "GROQ_CLOUD_API"])
-    openai_api_key: str = _get_cleaned_env(["openai_api_key", "OPENAI_API_KEY"])
-    default_model: str = "openai/gpt-oss-120b"
+    hf_token: str = _get_cleaned_env([
+        "hf_token",
+        "HF_TOKEN",
+        "HUGGINGFACE_TOKEN",
+        "HUGGING_FACE_HUB_TOKEN",
+        "HUGGINGFACEHUB_API_TOKEN",
+        "HUGGINGFACE_API_KEY",
+    ])
+    default_model: str = "arnab9961/bangladesh-law-smollm2"
     data_json_path: str = os.path.join(os.path.dirname(__file__), "..", "..", "data", "processed_law.json")
     meta_json_path: str = os.path.join(os.path.dirname(__file__), "..", "..", "data", "meta.json")
 

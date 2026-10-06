@@ -11,8 +11,8 @@ class Citation(BaseModel):
 
 class ChatRequest(BaseModel):
     message: str = Field(..., description="User prompt or legal query")
-    api_key: Optional[str] = Field(None, description="Optional Groq or OpenAI API key override")
-    model_name: Optional[str] = Field(None, description="Target LLM model")
+    api_key: Optional[str] = Field(None, description="Optional Hugging Face access token (hf_token) override")
+    model_name: Optional[str] = Field(None, description="Target Hugging Face model")
     top_k: int = Field(5, ge=1, le=20, description="Number of legal section citations to retrieve")
     temperature: float = Field(0.2, ge=0.0, le=1.0)
 
